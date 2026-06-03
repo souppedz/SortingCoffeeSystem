@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JavaSort — Coffee Auto Sorting System</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --forest-fern: #327039;
+            --wheat-field: #F0BE49;
+            --tilled-earth: #133020;
+            --alabaster-hay: #F8EDD9;
+            --cherry-grove: #DD5C36;
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: var(--alabaster-hay);
+            color: var(--tilled-earth);
+            overflow-x: hidden;
+        }
+
+        .fredoka { font-family: 'Fredoka One', sans-serif; }
+
+        /* ── OVERLAY ── */
+        #overlay {
+            position: fixed; inset: 0; z-index: 30;
+            background: rgba(19,48,32,0.5);
+            opacity: 0; pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+        #overlay.active { opacity: 1; pointer-events: all; }
+
+        /* ── SIDEBAR ── */
+        #sidebar {
+            position: fixed; top: 0; left: 0; z-index: 40;
+            width: 260px; height: 100dvh;
+            background: var(--tilled-earth);
+            display: flex; flex-direction: column;
+            transform: translateX(-100%);
+            transition: transform 0.35s cubic-bezier(0.4,0,0.2,1);
+            will-change: transform;
+        }
+        #sidebar.open { transform: translateX(0); }
+
+        @media (min-width: 768px) {
+            #sidebar { transform: translateX(0); }
+            #overlay { display: none; }
+        }
+
+        .sidebar-logo {
+            padding: 28px 24px 20px;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+            display: flex; align-items: center; justify-content: space-between;
+        }
+        .sidebar-logo span {
+            font-family: 'Fredoka One', sans-serif;
+            font-size: 1.5rem;
+            color: var(--wheat-field);
+            letter-spacing: 0.5px;
+        }
+        #close-sidebar {
+            display: none;
+            background: none; border: none; cursor: pointer;
+            color: rgba(255,255,255,0.5); font-size: 1.4rem;
+            line-height: 1; padding: 4px;
+            transition: color 0.2s;
+        }
+        #close-sidebar:hover { color: #fff; }
+        @media (max-width: 767px) { #close-sidebar { display: block; } }
+
+        .sidebar-nav {
+            flex: 1;
+            padding: 20px 12px;
+            display: flex; flex-direction: column; gap: 6px;
+        }
+        .nav-btn {
+            width: 100%; text-align: left;
+            background: none; border: none; cursor: pointer;
+            display: flex; align-items: center; gap: 12px;
+            padding: 12px 16px; border-radius: 12px;
+            color: rgba(255,255,255,0.65);
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 0.95rem; font-weight: 600;
+            transition: background 0.2s, color 0.2s;
+        }
+        .nav-btn .icon { font-size: 1.1rem; }
+        .nav-btn:hover { background: rgba(255,255,255,0.07); color: #fff; }
+        .nav-btn.active { background: rgba(240,190,73,0.15); color: var(--wheat-field); }
+
+        .sidebar-footer {
+            padding: 16px 24px 24px;
+            border-top: 1px solid rgba(255,255,255,0.08);
+            font-size: 0.75rem;
+            color: rgba(255,255,255,0.35);
+            line-height: 1.6;
+        }
+        .sidebar-footer strong { color: rgba(255,255,255,0.55); display: block; margin-bottom: 4px; }
+
+        /* ── TOP BAR (mobile) ── */
+        #topbar {
+            position: fixed; top: 0; left: 0; right: 0; z-index: 20;
+            height: 56px;
+            background: var(--alabaster-hay);
+            border-bottom: 1px solid rgba(19,48,32,0.1);
+            display: flex; align-items: center; padding: 0 16px;
+            gap: 12px;
+        }
+        @media (min-width: 768px) { #topbar { display: none; } }
+
+        #menu-btn {
+            background: none; border: none; cursor: pointer;
+            display: flex; flex-direction: column; gap: 5px; padding: 6px;
+        }
+        #menu-btn span {
+            display: block; width: 22px; height: 2px;
+            background: var(--tilled-earth); border-radius: 2px;
+        }
+        .topbar-title {
+            font-family: 'Fredoka One', sans-serif;
+            font-size: 1.15rem;
+            color: var(--tilled-earth);
+        }
+
+        /* ── MAIN LAYOUT ── */
+        #main {
+            margin-left: 0;
+            padding-top: 56px;
+            min-height: 100dvh;
+            display: flex; flex-direction: column;
+            transition: margin-left 0.35s cubic-bezier(0.4,0,0.2,1);
+        }
+        @media (min-width: 768px) {
+            #main { margin-left: 260px; padding-top: 0; }
+        }
+
+        /* ── PAGES ── */
+        .page { display: none; flex: 1; flex-direction: column; }
+        .page.active { display: flex; }
+
+        /* ── HERO ── */
+        #page-hero {
+            min-height: calc(100dvh - 56px);
+            padding: 40px 24px 60px;
+            justify-content: center; align-items: center;
+            position: relative;
+            overflow: hidden;
+        }
+        @media (min-width: 768px) { #page-hero { min-height: 100dvh; padding: 60px 60px 80px; } }
+
+        /* Decorative blobs */
+        #page-hero::before {
+            content: '';
+            position: absolute; top: -120px; right: -100px;
+            width: 420px; height: 420px;
+            background: radial-gradient(circle, rgba(240,190,73,0.18) 0%, transparent 70%);
+            border-radius: 50%;
+            pointer-events: none;
+        }
+        #page-hero::after {
+            content: '';
+            position: absolute; bottom: -80px; left: -80px;
+            width: 320px; height: 320px;
+            background: radial-gradient(circle, rgba(50,112,57,0.15) 0%, transparent 70%);
+            border-radius: 50%;
+            pointer-events: none;
+        }
+
+        .hero-inner {
+            position: relative; z-index: 1;
+            max-width: 680px;
+            width: 100%;
+            animation: fadeUp 0.8s ease both;
+        }
+
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(28px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        .hero-badge {
+            display: inline-flex; align-items: center; gap: 7px;
+            background: rgba(50,112,57,0.12);
+            border: 1px solid rgba(50,112,57,0.2);
+            color: var(--forest-fern);
+            font-size: 0.72rem; font-weight: 700;
+            letter-spacing: 0.08em; text-transform: uppercase;
+            padding: 5px 12px; border-radius: 99px;
+            margin-bottom: 20px;
+        }
+        .hero-badge::before { content: '●'; font-size: 0.5rem; }
+
+        .hero-title {
+            font-family: 'Fredoka One', sans-serif;
+            font-size: clamp(2.4rem, 7vw, 4.2rem);
+            line-height: 1.1;
+            color: var(--tilled-earth);
+            margin-bottom: 10px;
+        }
+        .hero-title .accent { color: var(--cherry-grove); }
+
+        .hero-sub {
+            font-size: clamp(1rem, 2.5vw, 1.2rem);
+            font-weight: 500;
+            color: rgba(19,48,32,0.55);
+            margin-bottom: 36px;
+            max-width: 480px;
+        }
+
+        .hero-team {
+            display: flex; flex-wrap: wrap; gap: 12px;
+            margin-bottom: 40px;
+        }
+        .team-card {
+            background: rgba(255,255,255,0.7);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(19,48,32,0.1);
+            border-radius: 14px;
+            padding: 14px 20px;
+            flex: 1 1 200px;
+        }
+        .team-card .name {
+            font-weight: 700; font-size: 0.95rem;
+            color: var(--forest-fern);
+            margin-bottom: 2px;
+        }
+        .team-card .nim {
+            font-size: 0.8rem; color: rgba(19,48,32,0.45); font-weight: 600;
+        }
+
+        .btn-primary {
+            display: inline-flex; align-items: center; gap: 10px;
+            background: var(--cherry-grove);
+            color: #fff;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-weight: 700; font-size: 1rem;
+            padding: 16px 32px; border-radius: 14px;
+            border: none; cursor: pointer;
+            box-shadow: 0 8px 24px rgba(221,92,54,0.3);
+            transition: transform 0.2s, box-shadow 0.2s;
+            text-decoration: none;
+        }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 12px 32px rgba(221,92,54,0.4); }
+        .btn-primary:active { transform: scale(0.97); }
+        .btn-primary svg { transition: transform 0.2s; }
+        .btn-primary:hover svg { transform: translateX(4px); }
+
+        /* stats row */
+        .hero-stats {
+            display: flex; gap: 24px; flex-wrap: wrap;
+            margin-top: 52px;
+            padding-top: 32px;
+            border-top: 1px solid rgba(19,48,32,0.1);
+        }
+        .stat { flex: 1 1 120px; }
+        .stat-num {
+            font-family: 'Fredoka One', sans-serif;
+            font-size: 1.8rem;
+            color: var(--tilled-earth);
+            line-height: 1;
+        }
+        .stat-num span { color: var(--cherry-grove); }
+        .stat-label { font-size: 0.75rem; font-weight: 600; color: rgba(19,48,32,0.45); margin-top: 4px; text-transform: uppercase; letter-spacing: 0.05em; }
+
+        /* ── DASHBOARD PAGE ── */
+        #page-dashboard {
+            padding: 24px;
+            gap: 20px;
+        }
+        @media (min-width: 768px) { #page-dashboard { padding: 32px 40px; } }
+
+        .dash-header {
+            display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: 12px;
+        }
+        .dash-title {
+            font-family: 'Fredoka One', sans-serif;
+            font-size: clamp(1.4rem, 4vw, 2rem);
+            color: var(--tilled-earth);
+            line-height: 1.1;
+        }
+        .dash-sub { font-size: 0.82rem; color: rgba(19,48,32,0.45); font-weight: 500; margin-top: 4px; }
+
+        .back-btn {
+            display: inline-flex; align-items: center; gap: 7px;
+            background: rgba(19,48,32,0.07);
+            border: none; cursor: pointer; border-radius: 10px;
+            padding: 9px 16px;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 0.82rem; font-weight: 700;
+            color: var(--forest-fern);
+            text-decoration: none;
+            transition: background 0.2s;
+            white-space: nowrap;
+        }
+        .back-btn:hover { background: rgba(19,48,32,0.12); }
+
+        .iframe-wrap {
+            flex: 1;
+            background: #fff;
+            border-radius: 20px;
+            border: 1px solid rgba(19,48,32,0.1);
+            overflow: hidden;
+            min-height: 520px;
+            box-shadow: 0 4px 24px rgba(19,48,32,0.06);
+            position: relative;
+        }
+        .iframe-wrap iframe {
+            width: 100%; height: 100%;
+            border: none; display: block;
+            min-height: 520px;
+        }
+        .iframe-placeholder {
+            position: absolute; inset: 0;
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            gap: 12px;
+            background: var(--alabaster-hay);
+            pointer-events: none;
+        }
+        .iframe-placeholder .icon { font-size: 3rem; }
+        .iframe-placeholder p { font-size: 0.85rem; color: rgba(19,48,32,0.45); font-weight: 600; text-align: center; max-width: 280px; }
+
+        /* ── FOOTER ── */
+        footer {
+            text-align: center;
+            padding: 20px;
+            font-size: 0.72rem;
+            color: rgba(19,48,32,0.35);
+            font-weight: 600;
+            border-top: 1px solid rgba(19,48,32,0.07);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Overlay (mobile) -->
+    <div id="overlay" onclick="closeSidebar()"></div>
+
+    <!-- Sidebar -->
+    <nav id="sidebar">
+        <div class="sidebar-logo">
+            <span>☕ JavaSort</span>
+            <button id="close-sidebar" onclick="closeSidebar()" aria-label="Close menu">✕</button>
+        </div>
+        <div class="sidebar-nav">
+            <button class="nav-btn active" id="nav-home" onclick="switchPage('hero')">
+                <span class="icon">🏠</span> Home
+            </button>
+            <button class="nav-btn" id="nav-dashboard" onclick="switchPage('dashboard')">
+                <span class="icon">📊</span> Dashboard
+            </button>
+        </div>
+        <div class="sidebar-footer">
+            <strong>Project Team</strong>
+            Zahrah Nur Azizah · 18224092<br>
+            Riko Satriya Giovanni · 18224108
+        </div>
+    </nav>
+
+    <!-- Top bar (mobile) -->
+    <header id="topbar">
+        <button id="menu-btn" onclick="openSidebar()" aria-label="Open menu">
+            <span></span><span></span><span></span>
+        </button>
+        <span class="topbar-title">☕ JavaSort</span>
+    </header>
+
+    <!-- Main content -->
+    <div id="main">
+
+        <!-- HERO PAGE -->
+        <section id="page-hero" class="page active">
+            <div class="hero-inner">
+                <div class="hero-badge">IoT Agriculture Innovation</div>
+
+                <h1 class="hero-title">
+                    Unroasted Coffee Beans<br>
+                    <span class="accent">Auto Sorting</span> System
+                </h1>
+                <p class="hero-sub">for your day to day use! Automated sorting based on color using ESP8266 with real-time cloud monitoring.</p>
+
+                <div class="hero-team">
+                    <div class="team-card">
+                        <div class="name">Zahrah Nur Azizah</div>
+                        <div class="nim">NIM. 18224092</div>
+                    </div>
+                    <div class="team-card">
+                        <div class="name">Riko Satriya Giovanni</div>
+                        <div class="nim">NIM. 18224108</div>
+                    </div>
+                </div>
+
+                <button class="btn-primary" onclick="switchPage('dashboard')">
+                    Go to Dashboard
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                </button>
+
+                <div class="hero-stats">
+                    <div class="stat">
+                        <div class="stat-num">3<span></span></div>
+                        <div class="stat-label">Bean Categories</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-num">ESP<span>8266</span></div>
+                        <div class="stat-label">Microcontroller</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-num">24<span>/7</span></div>
+                        <div class="stat-label">Cloud Monitoring</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- DASHBOARD PAGE -->
+        <section id="page-dashboard" class="page">
+            <div class="dash-header">
+                <div>
+                    <div class="dash-title">ThingsBoard Dashboard</div>
+                    <div class="dash-sub">Real-time coffee sorting data monitoring</div>
+                </div>
+                <button class="back-btn" onclick="switchPage('hero')">
+                    ← Kembali ke Home
+                </button>
+            </div>
+
+            <div class="iframe-wrap">
+                <!-- 
+                    ⚠️ Ganti URL di bawah dengan URL ThingsBoard kamu yang asli.
+                    Contoh: https://thingsboard.cloud/dashboard/YOUR_DASHBOARD_ID?publicId=YOUR_PUBLIC_ID
+                -->
+                <div class="iframe-placeholder" id="iframe-placeholder">
+                    <div class="icon">📡</div>
+                    <p>Ganti URL iframe di kode dengan link ThingsBoard dashboard kamu.</p>
+                </div>
+                <iframe 
+                    id="tb-iframe"
+                    src=""
+                    allowfullscreen
+                    loading="lazy"
+                    onload="document.getElementById('iframe-placeholder').style.display='none'">
+                </iframe>
+            </div>
+        </section>
+
+        <footer>© 2026 Coffee Auto Sorting System · JavaSort</footer>
+    </div>
+
+    <script>
+        // ── Page switching ──
+        function switchPage(page) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.getElementById('page-' + page).classList.add('active');
+
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById('nav-' + (page === 'hero' ? 'home' : page)).classList.add('active');
+
+            closeSidebar();
+            window.scrollTo(0, 0);
+        }
+
+        // ── Sidebar ──
+        function openSidebar() {
+            document.getElementById('sidebar').classList.add('open');
+            document.getElementById('overlay').classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+        function closeSidebar() {
+            document.getElementById('sidebar').classList.remove('open');
+            document.getElementById('overlay').classList.remove('active');
+            document.body.style.overflow = '';
+        }
+    </script>
+</body>
+</html>
