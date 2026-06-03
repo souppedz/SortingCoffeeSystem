@@ -430,26 +430,26 @@
                     ← Kembali ke Home
                 </button>
             </div>
-
-            <div class="iframe-wrap">
-                <!-- 
-                    ⚠️ Ganti URL di bawah dengan URL ThingsBoard kamu yang asli.
-                    Contoh: https://thingsboard.cloud/dashboard/YOUR_DASHBOARD_ID?publicId=YOUR_PUBLIC_ID
-                -->
-                <div class="iframe-placeholder" id="iframe-placeholder">
-                    <div class="icon">📡</div>
-                    <p>Ganti URL iframe di kode dengan link ThingsBoard dashboard kamu.</p>
+            
+            <div class="iframe-wrap" style="position: relative; width: 100%; height: 850px; overflow: hidden; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.08);">
+                
+                <div class="iframe-placeholder" id="iframe-placeholder" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; background: #f8f9fa; z-index: 2;">
+                    <div class="icon" style="font-size: 40px; margin-bottom: 10px;">📡</div>
+                    <p style="font-family: sans-serif; color: #6c757d;">Menghubungkan ke Dashboard ThingsBoard...</p>
                 </div>
+                
                 <iframe 
                     id="tb-iframe"
-                    src="https://thingsboard.cloud/dashboard/094887d0-5f40-11f1-ab06-f7fbb5c4dafd?publicId=8bda9e80-5f32-11f1-b1fe-512fdf4b9077"
-                    width="100%" 
-                    height="750px" 
-                    style="border:none; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
+                    src="https://thingsboard.cloud/dashboard/094887d0-5f40-11f1-ab06-f7fbb5c4dafd?publicId=8bda9e80-5f32-11f1-b1fe-512fdf4b9077&hideStateController=true&hideToolbar=true"
+                    width="100%"
+                    height="100%"
+                    style="border: none; width: 100%; height: 100%;"
+                    allowfullscreen
+                    loading="lazy"
+                    onload="document.getElementById('iframe-placeholder').style.display='none'">
                 </iframe>
-            </div>
-        </section>
 
+            </div>
         <footer>© 2026 Coffee Auto Sorting System · SOS</footer>
     </div>
 
