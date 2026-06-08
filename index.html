@@ -53,7 +53,7 @@ body {
 }
 #sidebar.open { transform: translateX(0); }
 @media(min-width:768px){
-  #sidebar{transform:translateX(0);}
+#sidebar{transform:translateX(0);}
   #overlay{display:none;}
 }
 
@@ -107,7 +107,7 @@ body {
 .nav-section-label {
   font-size: 0.62rem; font-weight: 800;
   letter-spacing: 0.15em; text-transform: uppercase;
-  color: rgba(255,255,255,0.2);
+  color: rgba(255,255,255,0.4);
   padding: 0 12px;
   margin: 16px 0 8px;
 }
@@ -121,15 +121,23 @@ body {
   color: rgba(255,255,255,0.5);
   font-family: 'Plus Jakarta Sans', sans-serif;
   font-size: 0.88rem; font-weight: 600;
-  transition: background 0.2s, color 0.2s;
+  transition: background 0.25s ease, color 0.25s ease;
   position: relative;
 }
-.nav-btn .nav-icon { font-size: 1rem; opacity: 0.7; }
-.nav-btn:hover { background: rgba(255,255,255,0.05); color: #fff; }
+.nav-btn .nav-icon { 
+  display: flex; align-items: center; justify-content: center;
+  width: 20px; height: 20px;
+  opacity: 0.6; 
+  transition: opacity 0.25s ease;
+}
+.nav-btn .nav-icon svg { width: 100%; height: 100%; }
+.nav-btn:hover { background: rgba(255,255,255,0.06); color: #fff; }
+.nav-btn:hover .nav-icon { opacity: 1; }
 .nav-btn.active {
   background: rgba(240,190,73,0.1);
   color: var(--wheat);
 }
+.nav-btn.active .nav-icon { opacity: 1; color: var(--wheat); }
 .nav-btn.active::before {
   content: '';
   position: absolute; left: 0; top: 50%;
@@ -140,13 +148,14 @@ body {
 }
 
 .sidebar-footer {
+  margin-top: auto;
   padding: 20px 24px 28px;
   border-top: 1px solid rgba(240,190,73,0.1);
 }
 .sidebar-footer .label {
   font-size: 0.6rem; font-weight: 800;
   letter-spacing: 0.15em; text-transform: uppercase;
-  color: rgba(255,255,255,0.2);
+  color: rgba(255,255,255,0.4);
   margin-bottom: 10px;
 }
 .sidebar-footer .member {
@@ -227,7 +236,7 @@ body {
 
 .hero-bg {
   position: absolute; inset: 0;
-  background: url('https://images.unsplash.com/photo-1587734005433-7e73a36cc0b0?w=1600&q=80') center/cover no-repeat;
+  background: url('https://images.unsplash.com/photo-1515694590185-73647ba02c10?q=80&w=2340&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D') center/cover no-repeat;
   transform: scale(1.05);
   animation: slowZoom 20s ease-in-out infinite alternate;
 }
@@ -239,8 +248,45 @@ body {
 .hero-grad {
   position: absolute; inset: 0;
   background:
-    linear-gradient(to top, rgba(10,20,14,1) 0%, rgba(10,20,14,0.7) 30%, rgba(10,20,14,0.1) 60%, transparent 100%),
-    linear-gradient(to right, rgba(10,20,14,0.5) 0%, transparent 60%);
+    linear-gradient(to top, rgba(14,32,21,1) 0%, rgba(14,32,21,0.8) 30%, transparent 100%),
+    linear-gradient(to right, rgba(26,61,34,0.6) 0%, transparent 70%),
+    rgba(26,61,34,0.35); /* Subtle green overall tint */
+}
+
+.hero-pattern {
+  position: absolute; inset: 0;
+  background-image: radial-gradient(rgba(248,237,217,0.08) 1px, transparent 1px);
+  background-size: 24px 24px;
+  opacity: 0.5;
+  z-index: 1;
+}
+
+.hero-status-badge {
+  position: absolute; top: 40px; right: 40px; z-index: 5;
+  display: inline-flex; align-items: center; gap: 8px;
+  background: rgba(14,32,21,0.6);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(240,190,73,0.2);
+  padding: 8px 16px; border-radius: 99px;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 0.75rem; font-weight: 700;
+  color: rgba(248,237,217,0.8);
+  letter-spacing: 0.05em;
+  animation: heroFadeUp 1.2s 0.2s cubic-bezier(0.22,1,0.36,1) both;
+}
+@media(max-width:767px){
+  .hero-status-badge { top: 20px; right: 20px; font-size: 0.65rem; padding: 6px 12px; }
+}
+.status-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: #5a8a2e;
+  box-shadow: 0 0 8px #5a8a2e;
+  animation: pulseStatus 2s infinite;
+}
+@keyframes pulseStatus {
+  0% { box-shadow: 0 0 0 0 rgba(90,138,46,0.7); }
+  70% { box-shadow: 0 0 0 6px rgba(90,138,46,0); }
+  100% { box-shadow: 0 0 0 0 rgba(90,138,46,0); }
 }
 
 .hero-content {
@@ -1025,7 +1071,7 @@ body {
 footer {
   padding: 24px 40px;
   background: var(--earth);
-  border-top: 1px solid rgba(240,190,73,0.08);
+  border-top: 1px solid rgba(240,190,73,0.15);
   display: flex; align-items: center; justify-content: space-between;
   flex-wrap: wrap; gap: 12px;
 }
@@ -1061,17 +1107,33 @@ footer {
   <div class="sidebar-nav">
     <div class="nav-section-label">Navigation</div>
     <button class="nav-btn active" id="nav-home" onclick="switchPage('hero')">
-      <span class="nav-icon" style="font-style:normal;font-family:'Cormorant Garamond',serif;font-size:1.1rem;opacity:0.8">H</span> Home
+      <span class="nav-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" d="m2.25 12 8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
+        </svg>
+      </span> Home
     </button>
     <button class="nav-btn" id="nav-dashboard" onclick="switchPage('dashboard')">
-      <span class="nav-icon" style="font-style:normal;font-family:'Cormorant Garamond',serif;font-size:1.1rem;opacity:0.8">D</span> Dashboard
+      <span class="nav-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6A2.25 2.25 0 0 1 6 3.75h2.25A2.25 2.25 0 0 1 10.5 6v2.25a2.25 2.25 0 0 1-2.25 2.25H6a2.25 2.25 0 0 1-2.25-2.25V6ZM3.75 15.75A2.25 2.25 0 0 1 6 13.5h2.25a2.25 2.25 0 0 1 2.25 2.25V18a2.25 2.25 0 0 1-2.25 2.25H6A2.25 2.25 0 0 1 3.75 18v-2.25ZM13.5 6a2.25 2.25 0 0 1 2.25-2.25H18A2.25 2.25 0 0 1 20.25 6v2.25A2.25 2.25 0 0 1 18 10.5h-2.25a2.25 2.25 0 0 1-2.25-2.25V6ZM13.5 15.75a2.25 2.25 0 0 1 2.25-2.25H18a2.25 2.25 0 0 1 2.25 2.25V18A2.25 2.25 0 0 1 18 20.25h-2.25A2.25 2.25 0 0 1 13.5 18v-2.25Z" />
+        </svg>
+      </span> Dashboard
     </button>
     <div class="nav-section-label">Project</div>
-    <button class="nav-btn" onclick="switchPage('hero'); setTimeout(()=>document.querySelector('.sim-section').scrollIntoView({behavior:'smooth'}),200)">
-      <span class="nav-icon" style="font-style:normal;font-family:'Cormorant Garamond',serif;font-size:1.1rem;opacity:0.8">S</span> Simulation
+    <button class="nav-btn" onclick="switchPage('hero', true); setTimeout(()=>document.querySelector('.sim-section').scrollIntoView({behavior:'smooth'}),200)">
+      <span class="nav-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M17.25 6.75 22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3-4.5 16.5" />
+        </svg>
+      </span> Simulation
     </button>
-    <button class="nav-btn" onclick="switchPage('hero'); setTimeout(()=>document.querySelector('.team-section').scrollIntoView({behavior:'smooth'}),200)">
-      <span class="nav-icon" style="font-style:normal;font-family:'Cormorant Garamond',serif;font-size:1.1rem;opacity:0.8">T</span> Team
+    <button class="nav-btn" onclick="switchPage('hero', true); setTimeout(()=>document.querySelector('.team-section').scrollIntoView({behavior:'smooth'}),200)">
+      <span class="nav-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 0 1 8.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0 1 11.964-3.07M12 6.375a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0Zm8.25 2.25a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Z" />
+        </svg>
+      </span> Team
     </button>
   </div>
   <div class="sidebar-footer">
@@ -1109,6 +1171,11 @@ footer {
     <div class="hero-film">
       <div class="hero-bg"></div>
       <div class="hero-grad"></div>
+      <div class="hero-pattern"></div>
+      <div class="hero-status-badge">
+        <div class="status-dot"></div>
+        System Online
+      </div>
       <div class="hero-content">
         <div class="eyebrow">
           <span class="eyebrow-dot"></span>
@@ -1125,7 +1192,7 @@ footer {
             Open Dashboard
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
           </button>
-          <button class="btn-hero btn-hero-ghost" onclick="document.querySelector('.about-section').scrollIntoView({behavior:'smooth'})">
+          <button class="btn-hero btn-hero-ghost" onclick="document.querySelector('.split-section').scrollIntoView({behavior:'smooth'})">
             Learn More
           </button>
         </div>
@@ -1233,17 +1300,18 @@ footer {
           </a>
         </div>
         <div class="sim-iframe-wrap">
-          <div class="sim-loading" id="sim-loading">
-            <div class="sim-loading-ring"></div>
-            <p>Loading simulation...</p>
+          <div class="sim-loading" id="sim-loading" style="cursor:pointer;" onclick="this.querySelector('svg').style.display='none'; this.querySelector('.sim-loading-ring').style.display='block'; this.querySelector('p').innerText='Loading simulation...'; this.style.pointerEvents='none'; document.getElementById('wokwi-iframe').src='https://wokwi.com/projects/465707672254498817';">
+            <svg viewBox="0 0 24 24" width="48" height="48" style="stroke:var(--wheat);fill:none;stroke-width:1.5;margin-bottom:12px"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8"/></svg>
+            <div class="sim-loading-ring" style="display:none;"></div>
+            <p>Click to Load Simulation</p>
           </div>
           <iframe
-            src="https://wokwi.com/projects/465707672254498817"
+            id="wokwi-iframe"
             width="100%"
             height="100%"
             allowfullscreen
             loading="lazy"
-            onload="document.getElementById('sim-loading').style.display='none'">
+            onload="if(this.src) document.getElementById('sim-loading').style.display='none'">
           </iframe>
         </div>
       </div>
@@ -1346,13 +1414,13 @@ footer {
 </div>
 
 <script>
-function switchPage(page){
+function switchPage(page, noScroll = false){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.getElementById('page-'+page).classList.add('active');
   document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
   document.getElementById('nav-'+(page==='hero'?'home':page)).classList.add('active');
   closeSidebar();
-  window.scrollTo(0,0);
+  if(!noScroll) window.scrollTo(0,0);
 }
 function openSidebar(){
   document.getElementById('sidebar').classList.add('open');
